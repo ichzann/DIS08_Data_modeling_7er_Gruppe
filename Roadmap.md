@@ -1,4 +1,4 @@
-#Roadmap
+# Roadmap
 
 | KW | Oberthema | Meilensteine |
 | :---: | :--- | :--- |
@@ -15,6 +15,7 @@
 | Parallel | Dokumentation | Projektmanagement Tagebuch |
 
 Anmerkungen:
-KW 47 -> Prjektwoche
-KW 52 -> Weihnachtsfeiertage
+KW 47 -> Prjektwoche  
+KW 52 -> Weihnachtsfeiertage  
 KW 1  -> Silvester
+
