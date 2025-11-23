@@ -46,15 +46,15 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
             datum = artikel.find("div", class_="date").text.strip()
             title = artikel.find("h3", class_="news-headline-clamp").find("a").text.strip().replace("\n", "")
             link = artikel.find("h3", class_="news-headline-clamp").find("a")["href"]
-            
+            id_tag = "/".join(link.rsplit("/", 2)[-2:])
             abstract_tag = artikel.find("p", class_=None)  
             if abstract_tag:
-                print(f"    {datum}  {"/".join(link.rsplit("/", 2)[-2:]):<15}", f"{title[:30]}", sep="\t")
+                print(f"    {datum}  {id_tag:<15}", f"{title[:30]}", sep="\t")
                 abstract = abstract_tag.text.strip() 
             # wenn abstract nicht da ist, soll der Text vom verlinketen artikel genommen werden 
             else:
                 try:
-                    print(f"    {datum}  {"/".join(link.rsplit("/", 2)[-2:]):<15}", f"{title[:30]}", "Kein Abstact gehe zum Artikel", sep="\t")
+                    print(f"    {datum}  {id_tag:<15}", f"{title[:30]}", "Kein Abstact gehe zum Artikel", sep="\t")
                     time.sleep(random.random()*2/tempo)
                     abstract_soup_unterseite = BeautifulSoup(requests.get(link).text, "html.parser")
                     abstract_liste_unterseite = abstract_soup_unterseite.find_all("p", class_=None)
@@ -72,6 +72,7 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
             data.append({
                 "stadt": stadt,
                 "datum": datum,
+                "id": id_tag,
                 "title": title,
                 "abstract": abstract,
                 "link": link
