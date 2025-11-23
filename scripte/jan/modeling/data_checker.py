@@ -14,7 +14,7 @@ LINE2 = "="*100
 
 # relativer Pfad vom Script zu den Datenordnern
 script_dir = os.path.dirname(os.path.abspath(__file__))
-data_sets_folder_path = os.path.join(script_dir, "../../data_sets")
+data_sets_folder_path = os.path.join(script_dir, "../../../Daten_sets")
 euda_sets_path = os.path.join(data_sets_folder_path, "EUDA_Wastewater_analysis_and_drugs")
 
 # Datei als DataFrame einlesen
@@ -34,6 +34,7 @@ def data_checker():
     print(df.isnull().sum())
     rows_with_nulls = df[df.isnull().any(axis=1)]
     print(rows_with_nulls["City"].unique())
+    print(df["Year"].unique())
     # Erste Zeilen (visuelle Kontrolle)
     print("\nErste Zeilen:")
     print(df.head())
