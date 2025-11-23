@@ -1,4 +1,3 @@
-from email.mime import base
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -6,6 +5,7 @@ import random
 import time
 from datetime import datetime
 import os
+from pprint import pprint
 
 def scrape(stadt: str, save_as_csv: bool = True):
     """
@@ -17,7 +17,7 @@ def scrape(stadt: str, save_as_csv: bool = True):
     seite: int = 0
     counter: int = 0
 
-    print("===== Starte Scraping =====")
+    print("\n\n\n===== Starte Scraping =====")
     while True:
         url: str = f"{base_url}/{seite}"
         print("Scrape URL:", url)
@@ -31,14 +31,34 @@ def scrape(stadt: str, save_as_csv: bool = True):
         soup = BeautifulSoup(response.text, "html.parser")
 
         artikel_liste = soup.find_all("article", class_="news")
+        print(f"- {len(artikel_liste)} Artikel auf dieser Seite gefunden.")
+        print("- Scrape Artikel:")
 
         for artikel in artikel_liste:
             datum = artikel.find("div", class_="date").text.strip()
-            title = soup.find("h3", class_="news-headline-clamp").find("a").text.strip()
-            abstract = soup.find("p", class_="")
-            link = soup.find("h3", class_="news-headline-clamp").find("a")["href"]
-            
+            title = artikel.find("h3", class_="news-headline-clamp").find("a").text.strip()
+            link = artikel.find("h3", class_="news-headline-clamp").find("a")["href"]
+            print((f"    ...{link.rsplit(".")[2].replace("de/", "")}"))
+            abstract_tag = artikel.find("p", class_=None)
+            # wenn abstract nicht da ist, soll der Text vom verlinketen artikel genommen werden  
+            if abstract_tag:
+                abstract = abstract_tag.text.strip()  
+                continue
+            else:
+                try:
+                    print("- Kein Abstact gehe zum Artikel")
+                    abstract_soup_unterseite = BeautifulSoup(requests.get(link).text, "html.parser")
+                    abstract_liste_unterseite = abstract_soup_unterseite.find_all("p", class_=None)
 
+                    abschnitte = []
+                    for abschnitt in abstract_liste_unterseite[1:]:
+                        text = abschnitt.text.strip()
+                        abschnitte.append(text)
+                    abstract = " ".join(abschnitte).replace("\n", "")
+                except Exception as e:
+                    print("Exception", e)
+                    abstract = "N/A"
+                
             data.append({
                 "stadt": stadt,
                 "datum": datum,
@@ -47,16 +67,14 @@ def scrape(stadt: str, save_as_csv: bool = True):
                 "link": link
             })
             counter += 1
-
-        if seite > 30:
-            break 
+        
 
         if not artikel_liste:
             print("Letzte Seite erreicht. Beende das Scrapen")
             break
 
         x = random.random()*8
-        print(f"Warten für {round(x, 1)} Sekunden\n"+"_"*50)
+        print(f"- Warten für {round(x, 1)} Sekunden\n"+"_"*50)
         time.sleep(x)
         seite += 30
 
