@@ -1,4 +1,5 @@
 from operator import rshift
+from urllib import request
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -16,14 +17,17 @@ def scrape(stadt: str, save_as_csv: bool = True):
     base_url: str = f"https://www.presseportal.de/blaulicht/r/{stadt}"
     data: list[dict]  = []
     seite: int = 0
-    counter: int = 0
+    article_counter: int = 0
+    request_counter: int = 0
 
     print("\n\n\n===== Starte Scraping =====")
     while True:
         url: str = f"{base_url}/{seite}"
         print("Scrape URL:", url)
-        print("- Seite:" + str(1 if seite < 30 else seite - 28))
+        eigentliche_seite = str(1 if seite < 29 else int(seite / 30) + 1)  # Da die webseite mit einem vielfachen von 30 pagnation 
+        print("- Seite:" + eigentliche_seite)
         response = requests.get(url)
+        request_counter += 1
 
         if response.status_code != 200:
             print("Bad Status code. Code: ", response.status_code)
@@ -32,9 +36,9 @@ def scrape(stadt: str, save_as_csv: bool = True):
         soup = BeautifulSoup(response.text, "html.parser")
 
         artikel_liste = soup.find_all("article", class_="news")
-        print(f"- {len(artikel_liste)} Artikel auf dieser Seite gefunden.")
-        print("- Scrape Artikel:\n    URL:        ", "Titel:", "\tHinweis:", sep="\t"*3)
-        print("    "+"_"*30+"\t"+ "_"*30+"\t"+ "_"*28)
+        print(f"- {len(artikel_liste)} Artikel auf Seite {eigentliche_seite} gefunden.")
+        print("- Scrape Artikel:\n    Datum: ", "ID:", "Titel:", "\tHinweis:", sep="\t"*2)
+        print("    "+"_"*15+"\t"+"_"*15+"\t"+ "_"*30+"\t"+ "_"*28)
 
         for artikel in artikel_liste:
             datum = artikel.find("div", class_="date").text.strip()
@@ -44,13 +48,15 @@ def scrape(stadt: str, save_as_csv: bool = True):
             abstract_tag = artikel.find("p", class_=None)
             # wenn abstract nicht da ist, soll der Text vom verlinketen artikel genommen werden  
             if abstract_tag:
-                print(f"    ...{link.rsplit(".")[2].replace("de/", ""):<30}", f"{title[:30]}", sep="\t")
+                print(f"    {datum}  {"/".join(link.rsplit("/", 2)[-2:]):<15}", f"{title[:30]}", sep="\t")
                 abstract = abstract_tag.text.strip()  
             else:
                 try:
-                    print(f"    ...{link.rsplit(".")[2].replace("de/", ""):<30}", f"{title[:30]}", "Kein Abstact gehe zum Artikel", sep="\t")
+                    print(f"    {datum}  {"/".join(link.rsplit("/", 2)[-2:]):<15}", f"{title[:30]}", "Kein Abstact gehe zum Artikel", sep="\t")
+                    time.sleep(random.random()*2)
                     abstract_soup_unterseite = BeautifulSoup(requests.get(link).text, "html.parser")
                     abstract_liste_unterseite = abstract_soup_unterseite.find_all("p", class_=None)
+                    request_counter += 1
 
                     abschnitte = []
                     for abschnitt in abstract_liste_unterseite[1:]:
@@ -68,7 +74,7 @@ def scrape(stadt: str, save_as_csv: bool = True):
                 "abstract": abstract,
                 "link": link
             })
-            counter += 1
+            article_counter += 1
             
 
         if not artikel_liste:
@@ -81,7 +87,8 @@ def scrape(stadt: str, save_as_csv: bool = True):
         seite += 30
 
 
-    print(f"- Es wurden für {stadt}: {len(artikel_liste)} gefunden")
+    print(f"- Es wurden bei {stadt}: {article_counter} Arktikel auf {eigentliche_seite} Seiten gefunden.")
+    print(f"- Erledigt in {request_counter} Requests")
 
     downloadzeit =  datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d")
     df = pd.DataFrame(data)
@@ -89,6 +96,7 @@ def scrape(stadt: str, save_as_csv: bool = True):
     if save_as_csv:
         csv_name = f"{stadt}_blaulicht_scrape_{downloadzeit}"
         df.to_csv(f"Daten_sets/{csv_name}.csv", index=False, encoding="utf-8")
+        print(f"DataFrame als CSV gespeichert. Dateiname: {csv_name}")
     
     return df
 
