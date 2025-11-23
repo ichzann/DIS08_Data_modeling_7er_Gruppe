@@ -9,9 +9,10 @@ from datetime import datetime
 import os
 from pprint import pprint
 
-def scrape(stadt: str, save_as_csv: bool = True):
+def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
     """
     städte = Dresden, Erfurt, Hamburg, München, Nürnberg, Chemnitz, Dortmund
+    tempo = 10 für schnell, 1 für langsam
     """
     stast = stadt
     base_url: str = f"https://www.presseportal.de/blaulicht/r/{stadt}"
@@ -37,7 +38,7 @@ def scrape(stadt: str, save_as_csv: bool = True):
 
         artikel_liste = soup.find_all("article", class_="news")
         print(f"- {len(artikel_liste)} Artikel auf Seite {eigentliche_seite} gefunden.")
-        print("- Scrape Artikel:\n    Datum: ", "ID:", "Titel:", "\tHinweis:", sep="\t"*2)
+        print("- Scrape Artikel:\n    Datum: ", "ID:", "Titel:", "\t\tHinweis:", sep="\t"*2)
         print("    "+"_"*15+"\t"+"_"*15+"\t"+ "_"*30+"\t"+ "_"*28)
 
         for artikel in artikel_liste:
@@ -53,7 +54,7 @@ def scrape(stadt: str, save_as_csv: bool = True):
             else:
                 try:
                     print(f"    {datum}  {"/".join(link.rsplit("/", 2)[-2:]):<15}", f"{title[:30]}", "Kein Abstact gehe zum Artikel", sep="\t")
-                    time.sleep(random.random()*2)
+                    time.sleep(random.random()*2/tempo)
                     abstract_soup_unterseite = BeautifulSoup(requests.get(link).text, "html.parser")
                     abstract_liste_unterseite = abstract_soup_unterseite.find_all("p", class_=None)
                     request_counter += 1
@@ -81,7 +82,7 @@ def scrape(stadt: str, save_as_csv: bool = True):
             print("Letzte Seite erreicht. Beende das Scrapen")
             break
 
-        x = random.random()*8
+        x = random.random()*8 / tempo
         print(f"- Seite Abgeschlossen. Warten für {round(x, 1)} Sekunden\n"+"_"*60)
         time.sleep(x)
         seite += 30
@@ -95,11 +96,11 @@ def scrape(stadt: str, save_as_csv: bool = True):
     
     if save_as_csv:
         csv_name = f"{stadt}_blaulicht_scrape_{downloadzeit}"
-        df.to_csv(f"Daten_sets/{csv_name}.csv", index=False, encoding="utf-8")
+        df.to_csv(f"Daten_sets/blaulicht_scraping/{csv_name}.csv", index=False, encoding="utf-8")
         print(f"DataFrame als CSV gespeichert. Dateiname: {csv_name}")
     
     return df
 
-scrape(stadt="Dortmund")
+scrape(stadt="Chemnitz", save_as_csv=True, tempo=8)
 
 #print(df.loc[df["title"].str.contains("Drogen")])
