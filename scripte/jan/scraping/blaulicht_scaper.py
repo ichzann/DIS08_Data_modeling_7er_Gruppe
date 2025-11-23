@@ -1,3 +1,4 @@
+from operator import rshift
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -32,21 +33,22 @@ def scrape(stadt: str, save_as_csv: bool = True):
 
         artikel_liste = soup.find_all("article", class_="news")
         print(f"- {len(artikel_liste)} Artikel auf dieser Seite gefunden.")
-        print("- Scrape Artikel:")
+        print("- Scrape Artikel:\n    URL:        ", "Titel:", "\tHinweis:", sep="\t"*3)
+        print("    "+"_"*30+"\t"+ "_"*30+"\t"+ "_"*28)
 
         for artikel in artikel_liste:
             datum = artikel.find("div", class_="date").text.strip()
-            title = artikel.find("h3", class_="news-headline-clamp").find("a").text.strip()
+            title = artikel.find("h3", class_="news-headline-clamp").find("a").text.strip().replace("\n", "")
             link = artikel.find("h3", class_="news-headline-clamp").find("a")["href"]
-            print((f"    ...{link.rsplit(".")[2].replace("de/", "")}"))
+            
             abstract_tag = artikel.find("p", class_=None)
             # wenn abstract nicht da ist, soll der Text vom verlinketen artikel genommen werden  
             if abstract_tag:
+                print(f"    ...{link.rsplit(".")[2].replace("de/", ""):<30}", f"{title[:30]}", sep="\t")
                 abstract = abstract_tag.text.strip()  
-                continue
             else:
                 try:
-                    print("- Kein Abstact gehe zum Artikel")
+                    print(f"    ...{link.rsplit(".")[2].replace("de/", ""):<30}", f"{title[:30]}", "Kein Abstact gehe zum Artikel", sep="\t")
                     abstract_soup_unterseite = BeautifulSoup(requests.get(link).text, "html.parser")
                     abstract_liste_unterseite = abstract_soup_unterseite.find_all("p", class_=None)
 
@@ -67,16 +69,17 @@ def scrape(stadt: str, save_as_csv: bool = True):
                 "link": link
             })
             counter += 1
-        
+            
 
         if not artikel_liste:
             print("Letzte Seite erreicht. Beende das Scrapen")
             break
 
         x = random.random()*8
-        print(f"- Warten für {round(x, 1)} Sekunden\n"+"_"*50)
+        print(f"- Seite Abgeschlossen. Warten für {round(x, 1)} Sekunden\n"+"_"*60)
         time.sleep(x)
         seite += 30
+
 
     print(f"- Es wurden für {stadt}: {len(artikel_liste)} gefunden")
 
