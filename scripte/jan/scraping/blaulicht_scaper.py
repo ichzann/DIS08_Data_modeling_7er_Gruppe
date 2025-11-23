@@ -11,10 +11,10 @@ from pprint import pprint
 
 def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
     """
-    städte = Dresden, Erfurt, Hamburg, München, Nürnberg, Chemnitz, Dortmund
-    tempo = 10 für schnell, 1 für langsam
+    städte:         Dresden, Erfurt, Hamburg, München, Nürnberg, Chemnitz, Dortmund\n
+    save_as_csv:    True, False (wenn gespeichert werden soll als CSV)\n
+    tempo:          10 für schnell, 1 für langsam
     """
-    stast = stadt
     base_url: str = f"https://www.presseportal.de/blaulicht/r/{stadt}"
     data: list[dict]  = []
     seite: int = 0
@@ -22,6 +22,7 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
     request_counter: int = 0
 
     print("\n\n\n===== Starte Scraping =====")
+
     while True:
         url: str = f"{base_url}/{seite}"
         print("Scrape URL:", url)
@@ -46,11 +47,11 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
             title = artikel.find("h3", class_="news-headline-clamp").find("a").text.strip().replace("\n", "")
             link = artikel.find("h3", class_="news-headline-clamp").find("a")["href"]
             
-            abstract_tag = artikel.find("p", class_=None)
-            # wenn abstract nicht da ist, soll der Text vom verlinketen artikel genommen werden  
+            abstract_tag = artikel.find("p", class_=None)  
             if abstract_tag:
                 print(f"    {datum}  {"/".join(link.rsplit("/", 2)[-2:]):<15}", f"{title[:30]}", sep="\t")
-                abstract = abstract_tag.text.strip()  
+                abstract = abstract_tag.text.strip() 
+            # wenn abstract nicht da ist, soll der Text vom verlinketen artikel genommen werden 
             else:
                 try:
                     print(f"    {datum}  {"/".join(link.rsplit("/", 2)[-2:]):<15}", f"{title[:30]}", "Kein Abstact gehe zum Artikel", sep="\t")
