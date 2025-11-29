@@ -5,6 +5,7 @@ Funktion:
 
 '''
 from ctypes.macholib.dyld import dyld_find
+from fileinput import filename
 import os
 import pandas as pd
 
@@ -18,8 +19,8 @@ data_sets_folder_path = os.path.join(script_dir, "../../../Daten_sets")
 euda_sets_path = os.path.join(data_sets_folder_path, "EUDA_Wastewater_analysis_and_drugs")
 
 # Datei als DataFrame einlesen
-file_name = "ww2025-all-data.csv" 
-df = pd.read_csv(os.path.join(euda_sets_path, "ww2025-all-data.csv"))
+file_name = "ww2025_deutschland.csv" 
+df = pd.read_csv(os.path.join(euda_sets_path, file_name))
 
     
 def data_checker():

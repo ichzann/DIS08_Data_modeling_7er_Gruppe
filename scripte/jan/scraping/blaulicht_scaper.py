@@ -1,13 +1,12 @@
-from operator import rshift
-from urllib import request
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 import random
 import time
 from datetime import datetime
+from multiprocessing import Pool
+import configparser
 import os
-from pprint import pprint
 
 def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
     """
@@ -103,6 +102,36 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
     
     return df
 
-scrape(stadt="Chemnitz", save_as_csv=True, tempo=8)
 
-#print(df.loc[df["title"].str.contains("Drogen")])
+def load_cities_from_config():
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    config_path = os.path.join(base_dir, 'config.ini')
+    
+    config = configparser.ConfigParser()
+    config.read(config_path, encoding='utf-8')
+    
+    try:
+        cities_string = config['ScrapingEinstellungen']['staedte']
+    except KeyError:
+        print("Fehler: Konnte 'staedte' in config.ini nicht finden.")
+        return []
+
+    cities_list = [city.strip() for city in cities_string.split(',')]
+    
+    return cities_list
+
+
+def main():
+    target_cities = load_cities_from_config()
+    
+    print(f"Starte Scraping für: {target_cities}")
+
+    with Pool() as p:
+        p.map(scrape, target_cities)
+
+
+
+if __name__ == "__main__":
+    main()
+
+
