@@ -20,7 +20,7 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
     article_counter: int = 0
     request_counter: int = 0
 
-    print("\n\n\n===== Starte Scraping =====")
+    print(f"\n\n\n===== Starte Scraping für {stadt} =====")
 
     while True:
         url: str = f"{base_url}/{seite}"
@@ -124,8 +124,6 @@ def load_cities_from_config():
 def main():
     target_cities = load_cities_from_config()
     
-    print(f"Starte Scraping für: {target_cities}")
-
     with Pool() as p:
         p.map(scrape, target_cities)
 
