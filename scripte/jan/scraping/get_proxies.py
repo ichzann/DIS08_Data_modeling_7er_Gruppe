@@ -55,15 +55,14 @@ def write_working_proxies():
 
         proxy_string = f"{ip}:{port}" 
 
-        print(f"Teste: {proxy_string} -", end="", sep="\t")
+        print(f"Teste: {proxy_string} \t-", end="")
         if is_proxy_working(proxy_string):
             print(" OK!")
             working_proxies.append(proxy_string)
         else:
             print(" Fehlgeschlagen.")
 
-    with open('working_proxies.txt', 'w') as f:
+    with open('scripte/jan/scraping/working_proxies.txt', 'w') as f:
         for p in working_proxies:
             f.write(f"{p}\n")
 
-write_working_proxies()
