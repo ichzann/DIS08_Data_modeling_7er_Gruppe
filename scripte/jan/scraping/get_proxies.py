@@ -35,3 +35,35 @@ def get_proxies():
     return daten_dic
 
 
+def is_proxy_working(proxy):
+    try:
+        response = requests.get('https://httpbin.org/ip', proxies={'http': proxy, 'https': proxy}, timeout=5)
+        return response.status_code == 200
+    except:
+        return False
+
+
+def write_working_proxies():
+    working_proxies = []
+    daten_dic = get_proxies()
+    for eintrag in daten_dic:
+        if not eintrag or "IP Address" not in eintrag:
+            continue
+
+        ip = eintrag["IP Address"]
+        port = eintrag["Port"]
+
+        proxy_string = f"{ip}:{port}" 
+
+        print(f"Teste: {proxy_string} -", end="", sep="\t")
+        if is_proxy_working(proxy_string):
+            print(" OK!")
+            working_proxies.append(proxy_string)
+        else:
+            print(" Fehlgeschlagen.")
+
+    with open('working_proxies.txt', 'w') as f:
+        for p in working_proxies:
+            f.write(f"{p}\n")
+
+write_working_proxies()
