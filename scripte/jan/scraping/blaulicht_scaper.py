@@ -7,7 +7,7 @@ from datetime import datetime
 from multiprocessing import Pool
 import configparser
 import os
-from get_proxies import check_proxy
+from get_proxies import main_proxies
 
 def load_proxies_from_file():
     PROXY_FILE_PATH = 'scripte/jan/scraping/working_proxies.txt'
@@ -168,7 +168,7 @@ def load_cities_from_config():
 
 def main():
     target_cities = load_cities_from_config()
-    print("="*60)
+    print("="*80)
     print("""
     ██████╗ ██╗      █████╗ ██╗   ██╗██╗██╗ ██████╗██╗  ██╗████████╗
     ██╔══██╗██║     ██╔══██╗██║   ██║██║██║██╔════╝██║  ██║╚══██╔══╝
@@ -184,9 +184,9 @@ def main():
     ███████║╚██████╗██║  ██║██║  ██║██║     ███████╗██║  ██║        
     ╚══════╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝
     """)
-    print("="*60)
+    print("="*80)
     print("Suche frische Proxies...")
-    write_working_proxies()
+    main_proxies()
     with Pool(processes=1) as p:
         p.map(scrape, target_cities)
 

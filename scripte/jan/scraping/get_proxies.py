@@ -47,7 +47,7 @@ def check_proxy(proxy_string):
         return False
 
 
-def main():
+def main_proxies():
     print("\n- Sammle Proxies von: https://httpbin.org/ip\n")
     daten_dic = get_proxies()
 
@@ -80,5 +80,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main_proxies()
 
