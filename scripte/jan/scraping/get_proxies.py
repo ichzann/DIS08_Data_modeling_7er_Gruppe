@@ -3,7 +3,7 @@ from matplotlib.pyplot import fill
 import requests
 from bs4 import BeautifulSoup
 from pprint import pprint
-
+from multiprocessing import Pool
 
 def get_proxies():
     url: str = "https://free-proxy-list.net/de/ssl-proxy.html"
@@ -37,7 +37,7 @@ def get_proxies():
 
 def is_proxy_working(proxy):
     try:
-        response = requests.get('https://httpbin.org/ip', proxies={'http': proxy, 'https': proxy}, timeout=5)
+        response = requests.get('https://httpbin.org/ip', proxies={'http': proxy, 'https': proxy}, timeout=3)
         return response.status_code == 200
     except:
         return False
@@ -55,12 +55,15 @@ def write_working_proxies():
 
         proxy_string = f"{ip}:{port}" 
 
-        print(f"Teste: {proxy_string} \t-", end="")
-        if is_proxy_working(proxy_string):
-            print(" OK!")
-            working_proxies.append(proxy_string)
-        else:
-            print(" Fehlgeschlagen.")
+        print(f"Teste: {proxy_string:.15d} \t-", end="")
+        with Pool(processes=1) as p:
+            p.map(is_proxy_working, proxy_string)
+            print(f"Teste: {proxy_string:.15d} \t-", end="")
+            if is_proxy_working(proxy_string):
+                print(" OK!")
+                working_proxies.append(proxy_string)
+            else:
+                print(" Fehlgeschlagen.")
 
     with open('scripte/jan/scraping/working_proxies.txt', 'w') as f:
         for p in working_proxies:
