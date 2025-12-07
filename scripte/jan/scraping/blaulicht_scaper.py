@@ -7,7 +7,7 @@ from datetime import datetime
 from multiprocessing import Pool
 import configparser
 import os
-from get_proxies import write_working_proxies
+from get_proxies import check_proxy
 
 def load_proxies_from_file():
     PROXY_FILE_PATH = 'scripte/jan/scraping/working_proxies.txt'

@@ -35,37 +35,46 @@ def get_proxies():
     return daten_dic
 
 
-def is_proxy_working(proxy):
+def check_proxy(proxy_string):
     try:
-        response = requests.get('https://httpbin.org/ip', proxies={'http': proxy, 'https': proxy}, timeout=3)
-        return response.status_code == 200
+        response = requests.get('https://httpbin.org/ip', proxies={'http': proxy_string, 'https': proxy_string}, timeout=3)
+        print(f"[+] Funktioniert: {proxy_string}")
+        return proxy_string
     except:
         return False
 
 
-def write_working_proxies():
-    working_proxies = []
+def main():
+    print("Sammle Proxies...")
     daten_dic = get_proxies()
+    
+    proxy_liste = []
     for eintrag in daten_dic:
-        if not eintrag or "IP Address" not in eintrag:
-            continue
+        if "IP Address" in eintrag and "Port" in eintrag:
+            ip = eintrag["IP Address"]
+            port = eintrag["Port"]
+            proxy_liste.append(f"{ip}:{port}")
 
-        ip = eintrag["IP Address"]
-        port = eintrag["Port"]
+    print(f"{len(proxy_liste)} Proxies gefunden. Starte Test mit Multiprocessing...")
 
-        proxy_string = f"{ip}:{port}" 
+    working_proxies = []
 
-        print(f"Teste: {proxy_string:.15d} \t-", end="")
-        with Pool(processes=1) as p:
-            p.map(is_proxy_working, proxy_string)
-            print(f"Teste: {proxy_string:.15d} \t-", end="")
-            if is_proxy_working(proxy_string):
-                print(" OK!")
-                working_proxies.append(proxy_string)
-            else:
-                print(" Fehlgeschlagen.")
+    with Pool(processes=10) as p:
+        ergebnisse = p.map(check_proxy, proxy_liste)
 
-    with open('scripte/jan/scraping/working_proxies.txt', 'w') as f:
+    # None-Werte rauswerfn
+    working_proxies = [proxy for proxy in ergebnisse if proxy is not None]
+
+    print(f"\nFertig - {len(working_proxies)} funktionierende Proxies gefunden.")
+
+
+    pfad = 'scripte/jan/scraping/working_proxies.txt' 
+    with open(pfad, 'w') as f:
         for p in working_proxies:
             f.write(f"{p}\n")
+    print(f"Gespeichert unter {pfad}")
+
+
+if __name__ == '__main__':
+    main()
 
