@@ -7,6 +7,51 @@ from datetime import datetime
 from multiprocessing import Pool
 import configparser
 import os
+from get_proxies import write_working_proxies
+
+def load_proxies_from_file():
+    PROXY_FILE_PATH = 'scripte/jan/scraping/working_proxies.txt'
+    if not os.path.exists(PROXY_FILE_PATH):
+        print(f"Warnung: Proxy-Datei {PROXY_FILE_PATH} nicht gefunden.")
+        return []
+    
+    with open(PROXY_FILE_PATH, 'r') as f:
+        proxies = [line.strip() for line in f if line.strip()]
+    return proxies
+
+
+def make_request_with_proxy(url, proxy_list, max_retries=10):
+    if not proxy_list:
+        print("Keine Proxies geladen, soll direkte Verbindung verwendet werden?")
+        if input("Y/N").upper() == "Y":
+            try:
+                return requests.get(url, timeout=10)
+            except Exception as e:
+                print(f"Direkte Verbindung fehlgeschlagen: {e}")
+                return None
+        else:
+            print("Scraping versuch abgebrochen")
+
+    for attempt in range(max_retries):
+        proxy = random.choice(proxy_list)
+        proxies_dict = {'http': proxy, 'https': proxy}
+        
+        try:
+            response = requests.get(url, proxies=proxies_dict, timeout=8)
+            
+            if response.status_code == 200:
+                return response
+            elif response.status_code == 404:
+                return response
+            else:
+                continue    # Nächsten Proxy probieren
+                
+        except Exception:
+            # Verbindungstimeout oder Proxy Fehler. Nächster Versuch
+            continue
+            
+    print(f"Fehler: Konnte URL auch nach {max_retries} Versuchen mit verschiedenen Proxies nicht laden.")
+    return None
 
 def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
     """
