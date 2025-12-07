@@ -4,10 +4,41 @@ from bs4 import BeautifulSoup
 import random
 import time
 from datetime import datetime
-from multiprocessing import Pool
+from multiprocessing import Pool, Lock
 import configparser
 import os
 from get_proxies import main_proxies
+from colorama import Fore, Style, init
+
+# Init colorama für Windows Kompatibilität
+init()
+
+# Globale Variable für den Lock innerhalb der Worker-Prozesse
+print_lock = None
+
+def init_worker(l):
+    global print_lock
+    print_lock = l
+
+def get_city_color(stadt):
+    """Weist jeder Stadt eine feste Farbe zu"""
+    colors = [Fore.GREEN, Fore.YELLOW, Fore.CYAN, Fore.MAGENTA, Fore.BLUE, Fore.RED]
+    # Einfacher Hash, damit die gleiche Stadt immer die gleiche Farbe bekommt
+    color_index = sum(ord(c) for c in stadt) % len(colors)
+    return colors[color_index]
+
+def safe_print(text, stadt="System"):
+    """Thread-sicheres Drucken mit Farben"""
+    color = get_city_color(stadt)
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    
+    # Der Lock sorgt dafür, dass dieser Block nicht unterbrochen wird
+    with print_lock:
+        # Wir färben nur den Städtenamen und den Timestamp
+        prefix = f"{Style.BRIGHT}{color}[{timestamp} | {stadt:<10}]{Style.RESET_ALL}"
+        # Wenn der Text mehrere Zeilen hat (wie deine Tabelle), rücken wir sie ein
+        formatted_text = text.replace("\n", f"\n{' ' * 24}")
+        print(f"{prefix} {formatted_text}")
 
 def load_proxies_from_file():
     PROXY_FILE_PATH = 'scripte/jan/scraping/working_proxies.txt'
@@ -35,7 +66,7 @@ def make_request_with_proxy(url, proxy_list, max_retries=10, context="System"):
     for attempt in range(max_retries):
         proxy = random.choice(proxy_list)
         proxies_dict = {'http': proxy, 'https': proxy}
-        print(f"[{context}] Versuch {attempt+1}/{max_retries} mit Proxy: {proxy}")
+        safe_print(f"[{context}] Versuch {attempt+1}/{max_retries} mit Proxy: {proxy}")
         
         try:
             response = requests.get(url, proxies=proxies_dict, timeout=8)
@@ -51,7 +82,7 @@ def make_request_with_proxy(url, proxy_list, max_retries=10, context="System"):
             # Verbindungstimeout oder Proxy Fehler. Nächster Versuch
             continue
             
-    print(f"Fehler: Konnte URL auch nach {max_retries} Versuchen mit verschiedenen Proxies nicht laden.")
+    safe_print(f"{Fore.RED}FEHLER: Alle Proxies fehlgeschlagen.{Style.RESET_ALL}", context)
     return None
 
 def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
@@ -67,13 +98,12 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
     request_counter: int = 0
     proxy_list = load_proxies_from_file()
 
-    print(f"\n\n\n===== Starte Scraping für {stadt} =====")
+    safe_print(f"\n\n\n===== Starte Scraping für {stadt} =====")
 
     while True:
         url: str = f"{base_url}/{seite}"
-        print("Scrape URL:", url)
         eigentliche_seite = str(1 if seite < 29 else int(seite / 30) + 1)  # Da die webseite mit einem vielfachen von 30 pagnation 
-        print("- Seite:" + eigentliche_seite)
+
         response = make_request_with_proxy(url, proxy_list, context=stadt)
         request_counter += 1
 
@@ -84,9 +114,9 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
         soup = BeautifulSoup(response.text, "html.parser")
         artikel_liste = soup.find_all("article", class_="news")
 
-        print(f"- {len(artikel_liste)} Artikel auf Seite {eigentliche_seite} gefunden.")
-        print("- Scrape Artikel:\n    Datum: ", "ID:", "Titel:", "\t\tHinweis:", sep="\t"*2)
-        print("    "+"_"*15+"\t"+"_"*15+"\t"+ "_"*30+"\t"+ "_"*28)
+        msg = f"{len(artikel_liste)} Artikel auf Seite {eigentliche_seite} gefunden.\n"
+        msg += f"{'Datum':<18} {'ID':<15} {'Titel':<30}\n"
+        msg += f"{'_'*18} {'_'*15} {'_'*30}"    
 
         for artikel in artikel_liste:
             datum = artikel.find("div", class_="date").text.strip()
@@ -95,12 +125,12 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
             id_tag = "/".join(link.rsplit("/", 2)[-2:])
             abstract_tag = artikel.find("p", class_=None)  
             if abstract_tag:
-                print(f"    {datum}  {id_tag:<15}", f"{title[:30]}", sep="\t")
+                msg += f"\n{datum:<18} {id_tag:<15} {title}"
                 abstract = abstract_tag.text.strip() 
             # wenn abstract nicht da ist, soll der Text vom verlinketen artikel genommen werden 
             else:
                 try:
-                    print(f"    {datum}  {id_tag:<15}", f"{title[:30]}", "Kein Abstact gehe zum Artikel", sep="\t")
+                    msg += f"\n{datum:<18} {id_tag:<15} {title}"
                     time.sleep(random.random()*2/tempo)
                     response_unterseite = make_request_with_proxy(link, proxy_list, context=stadt)
                     abstract_soup_unterseite = BeautifulSoup(response_unterseite.text, "html.parser")
@@ -115,6 +145,7 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
                 except Exception as e:
                     print("Exception", e)
                     abstract = "N/A"
+            data.append({"stadt": stadt, "title": title})
                 
             data.append({
                 "stadt": stadt,
@@ -125,13 +156,14 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
                 "link": link
             })
             article_counter += 1
-            
+        
 
         if not artikel_liste:
             print("Letzte Seite erreicht. Beende das Scrapen")
             break
 
         x = random.random()*8 / tempo
+        safe_print(msg, stadt)   
         print(f"- Seite Abgeschlossen. Warten für {round(x, 1)} Sekunden\n"+"_"*60)
         time.sleep(x)
         seite += 30
@@ -147,6 +179,7 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
         csv_name = f"{stadt}_blaulicht_scrape_{downloadzeit}"
         df.to_csv(f"Daten_sets/blaulicht_scraping/{csv_name}.csv", index=False, encoding="utf-8")
         print(f"DataFrame als CSV gespeichert. Dateiname: {csv_name}")
+        safe_print(f"Fertig! {article_counter} Artikel gespeichert.", stadt)
     
     return df
 
@@ -190,7 +223,11 @@ def main():
     print("="*80)
     print("Suche frische Proxies...")
     main_proxies()
-    with Pool(processes=1) as p:
+    l = Lock()
+    anzahl_prozesse = 3
+    print(f"Starte Multiprocessing mit {anzahl_prozesse} Prozessen für {len(target_cities)} Städte...")
+
+    with Pool(processes=anzahl_prozesse, initializer=init_worker, initargs=(l,)) as p:
         p.map(scrape, target_cities)
 
 
