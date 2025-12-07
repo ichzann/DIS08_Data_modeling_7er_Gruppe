@@ -38,14 +38,15 @@ def get_proxies():
 def check_proxy(proxy_string):
     try:
         response = requests.get('https://httpbin.org/ip', proxies={'http': proxy_string, 'https': proxy_string}, timeout=3)
-        print(f"[+] Funktioniert: {proxy_string}")
+        print(f"[+] Funktioniert:\t{proxy_string}")
         return proxy_string
     except:
+        print(f"    unavailable:\t{proxy_string}")
         return False
 
 
 def main():
-    print("Sammle Proxies...")
+    print("\n- Sammle Proxies von: https://httpbin.org/ip\n")
     daten_dic = get_proxies()
     
     proxy_liste = []
@@ -55,15 +56,15 @@ def main():
             port = eintrag["Port"]
             proxy_liste.append(f"{ip}:{port}")
 
-    print(f"{len(proxy_liste)} Proxies gefunden. Starte Test mit Multiprocessing...")
+    print(f"- Insgesamt {len(proxy_liste)} Proxies gefunden. Starte health check for Proxies\n\n- Starte dafür Multiprocessing mit: 10 Threads")
 
     working_proxies = []
 
     with Pool(processes=10) as p:
         ergebnisse = p.map(check_proxy, proxy_liste)
 
-    # None-Werte rauswerfn
-    working_proxies = [proxy for proxy in ergebnisse if proxy is not None]
+    # None/ False Werte rauswerfn
+    working_proxies = [proxy for proxy in ergebnisse if proxy is not None or False]
 
     print(f"\nFertig - {len(working_proxies)} funktionierende Proxies gefunden.")
 
