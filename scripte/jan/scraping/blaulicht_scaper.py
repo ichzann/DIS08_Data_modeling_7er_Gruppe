@@ -20,7 +20,7 @@ def load_proxies_from_file():
     return proxies
 
 
-def make_request_with_proxy(url, proxy_list, max_retries=10):
+def make_request_with_proxy(url, proxy_list, max_retries=10, context="System"):
     if not proxy_list:
         print("Keine Proxies geladen, soll direkte Verbindung verwendet werden?")
         if input("Y/N").upper() == "Y":
@@ -35,6 +35,7 @@ def make_request_with_proxy(url, proxy_list, max_retries=10):
     for attempt in range(max_retries):
         proxy = random.choice(proxy_list)
         proxies_dict = {'http': proxy, 'https': proxy}
+        print(f"[{context}] Versuch {attempt+1}/{max_retries} mit Proxy: {proxy}")
         
         try:
             response = requests.get(url, proxies=proxies_dict, timeout=8)
@@ -64,6 +65,7 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
     seite: int = 0
     article_counter: int = 0
     request_counter: int = 0
+    proxy_list = load_proxies_from_file()
 
     print(f"\n\n\n===== Starte Scraping für {stadt} =====")
 
@@ -72,16 +74,16 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
         print("Scrape URL:", url)
         eigentliche_seite = str(1 if seite < 29 else int(seite / 30) + 1)  # Da die webseite mit einem vielfachen von 30 pagnation 
         print("- Seite:" + eigentliche_seite)
-        response = requests.get(url)
+        response = make_request_with_proxy(url, proxy_list, context=stadt)
         request_counter += 1
 
         if response.status_code != 200:
             print("Bad Status code. Code: ", response.status_code)
             break
-
+        
         soup = BeautifulSoup(response.text, "html.parser")
-
         artikel_liste = soup.find_all("article", class_="news")
+
         print(f"- {len(artikel_liste)} Artikel auf Seite {eigentliche_seite} gefunden.")
         print("- Scrape Artikel:\n    Datum: ", "ID:", "Titel:", "\t\tHinweis:", sep="\t"*2)
         print("    "+"_"*15+"\t"+"_"*15+"\t"+ "_"*30+"\t"+ "_"*28)
@@ -100,7 +102,8 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
                 try:
                     print(f"    {datum}  {id_tag:<15}", f"{title[:30]}", "Kein Abstact gehe zum Artikel", sep="\t")
                     time.sleep(random.random()*2/tempo)
-                    abstract_soup_unterseite = BeautifulSoup(requests.get(link).text, "html.parser")
+                    response_unterseite = make_request_with_proxy(link, proxy_list, context=stadt)
+                    abstract_soup_unterseite = BeautifulSoup(response_unterseite.text, "html.parser")
                     abstract_liste_unterseite = abstract_soup_unterseite.find_all("p", class_=None)
                     request_counter += 1
 
