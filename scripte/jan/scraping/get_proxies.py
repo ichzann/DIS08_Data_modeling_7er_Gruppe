@@ -4,6 +4,8 @@ import requests
 from bs4 import BeautifulSoup
 from pprint import pprint
 from multiprocessing import Pool
+import time
+
 
 def get_proxies():
     url: str = "https://free-proxy-list.net/de/ssl-proxy.html"
@@ -48,7 +50,7 @@ def check_proxy(proxy_string):
 def main():
     print("\n- Sammle Proxies von: https://httpbin.org/ip\n")
     daten_dic = get_proxies()
-    
+
     proxy_liste = []
     for eintrag in daten_dic:
         if "IP Address" in eintrag and "Port" in eintrag:
@@ -57,6 +59,7 @@ def main():
             proxy_liste.append(f"{ip}:{port}")
 
     print(f"- Insgesamt {len(proxy_liste)} Proxies gefunden. Starte health check for Proxies\n\n- Starte dafür Multiprocessing mit: 10 Threads")
+    print("_"*45)
 
     working_proxies = []
 
@@ -64,16 +67,16 @@ def main():
         ergebnisse = p.map(check_proxy, proxy_liste)
 
     # None/ False Werte rauswerfn
-    working_proxies = [proxy for proxy in ergebnisse if proxy is not None or False]
+    working_proxies = [proxy for proxy in ergebnisse if proxy is not None and proxy != "False"]
 
-    print(f"\nFertig - {len(working_proxies)} funktionierende Proxies gefunden.")
+    print(f"\n- Fertig - {len(working_proxies)} funktionierende Proxies gefunden.\n")
 
 
     pfad = 'scripte/jan/scraping/working_proxies.txt' 
     with open(pfad, 'w') as f:
         for p in working_proxies:
             f.write(f"{p}\n")
-    print(f"Gespeichert unter {pfad}")
+    print(f"- Gespeichert unter {pfad}")
 
 
 if __name__ == '__main__':
