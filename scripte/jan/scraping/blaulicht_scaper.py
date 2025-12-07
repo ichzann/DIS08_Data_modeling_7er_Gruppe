@@ -124,13 +124,14 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
             link = artikel.find("h3", class_="news-headline-clamp").find("a")["href"]
             id_tag = "/".join(link.rsplit("/", 2)[-2:])
             abstract_tag = artikel.find("p", class_=None)  
+
+            msg += f"\n{datum:<18} {id_tag:<15} {title[:30]}"
+
             if abstract_tag:
-                msg += f"\n{datum:<18} {id_tag:<15} {title}"
                 abstract = abstract_tag.text.strip() 
             # wenn abstract nicht da ist, soll der Text vom verlinketen artikel genommen werden 
             else:
                 try:
-                    msg += f"\n{datum:<18} {id_tag:<15} {title}"
                     time.sleep(random.random()*2/tempo)
                     response_unterseite = make_request_with_proxy(link, proxy_list, context=stadt)
                     abstract_soup_unterseite = BeautifulSoup(response_unterseite.text, "html.parser")
@@ -145,7 +146,6 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
                 except Exception as e:
                     print("Exception", e)
                     abstract = "N/A"
-            data.append({"stadt": stadt, "title": title})
                 
             data.append({
                 "stadt": stadt,
@@ -162,20 +162,18 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
             print("Letzte Seite erreicht. Beende das Scrapen")
             break
 
-        x = random.random()*8 / tempo
-        safe_print(msg, stadt)   
-        print(f"- Seite Abgeschlossen. Warten für {round(x, 1)} Sekunden\n"+"_"*60)
+        safe_print(msg, stadt) 
+        x = random.random()*2 / tempo  
         time.sleep(x)
         seite += 30
 
 
-    print(f"- Es wurden bei {stadt}: {article_counter} Arktikel auf {eigentliche_seite} Seiten gefunden.")
-    print(f"- Erledigt in {request_counter} Requests")
+    safe_print(f"Fertig! {article_counter} Artikel in {request_counter} Requests gefunden.", stadt)
 
     downloadzeit =  datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d")
     df = pd.DataFrame(data)
     
-    if save_as_csv:
+    if save_as_csv and not df.empty:
         csv_name = f"{stadt}_blaulicht_scrape_{downloadzeit}"
         df.to_csv(f"Daten_sets/blaulicht_scraping/{csv_name}.csv", index=False, encoding="utf-8")
         print(f"DataFrame als CSV gespeichert. Dateiname: {csv_name}")
@@ -224,7 +222,7 @@ def main():
     print("Suche frische Proxies...")
     main_proxies()
     l = Lock()
-    anzahl_prozesse = 3
+    anzahl_prozesse = 2
     print(f"Starte Multiprocessing mit {anzahl_prozesse} Prozessen für {len(target_cities)} Städte...")
 
     with Pool(processes=anzahl_prozesse, initializer=init_worker, initargs=(l,)) as p:
