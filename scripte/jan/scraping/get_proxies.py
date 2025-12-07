@@ -67,7 +67,7 @@ def main():
         ergebnisse = p.map(check_proxy, proxy_liste)
 
     # None/ False Werte rauswerfn
-    working_proxies = [proxy for proxy in ergebnisse if proxy is not None and proxy != "False"]
+    working_proxies = [proxy for proxy in ergebnisse if proxy]
 
     print(f"\n- Fertig - {len(working_proxies)} funktionierende Proxies gefunden.\n")
 
