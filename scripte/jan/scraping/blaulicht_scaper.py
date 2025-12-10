@@ -222,12 +222,12 @@ def main():
     print("Suche frische Proxies...")
     main_proxies()
     l = Lock()
-    anzahl_prozesse = 7
+    anzahl_prozesse = 2
     print(f"Starte Multiprocessing mit {anzahl_prozesse} Prozessen für {len(target_cities)} Städte...")
 
     with Pool(processes=anzahl_prozesse, initializer=init_worker, initargs=(l,)) as p:
         p.map(scrape, target_cities)
-
+    
 
 
 if __name__ == "__main__":
