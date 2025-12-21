@@ -1,3 +1,4 @@
+from typing import override
 import pandas as pd
 import os
 
@@ -20,10 +21,12 @@ for filename in os.listdir(daten_sets_path):
             "stadt": df["stadt"].iloc[0] if not df.empty else "Unbekannt",
             "von": df["datum"].min(),
             "bis": df["datum"].max(),
-            "anzahl_posts": len(df)
-        }
+            "anzahl_posts": len(df),
+            
+            **{f"posts_{int(year)}": len(df[df["datum"].dt.year == year]) 
+                for year in df["datum"].dt.year.dropna().unique()}
+            }
         
-        # 3. Dictionary der Liste hinzufügen
     staedte_liste.append(stadt_info)
 
 
