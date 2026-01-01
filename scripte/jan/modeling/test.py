@@ -29,6 +29,20 @@ def nach_droge_segmentieren(df, drogenname: str):
 
 drugs = df["Metabolite"].unique().tolist()
 
-
+"""
 for droge in drugs:
     nach_droge_segmentieren(df, droge)
+"""
+
+def speichere_durchschnitt_aller_drogen(df):
+    df_avg = df.pivot_table(index='Year', columns='City', values='Daily mean', aggfunc='mean')
+
+    df_avg = df_avg.reset_index()
+    df_avg.columns.name = None
+    print(df_avg.head(3))
+
+    dateiname = "ww2025_average_all_drugs_pivoted.csv"
+    df_avg.to_csv(os.path.join(filtered_by_drug_data_sets, dateiname), index=False)
+    print("Gespeichert:", dateiname)
+
+speichere_durchschnitt_aller_drogen(df)
