@@ -32,11 +32,8 @@ def safe_print(text, stadt="System"):
     color = get_city_color(stadt)
     timestamp = datetime.now().strftime("%H:%M:%S")
     
-    # Der Lock sorgt dafür, dass dieser Block nicht unterbrochen wird
     with print_lock:
-        # Wir färben nur den Städtenamen und den Timestamp
         prefix = f"{Style.BRIGHT}{color}[{timestamp} | {stadt:<10}]{Style.RESET_ALL}"
-        # Wenn der Text mehrere Zeilen hat (wie deine Tabelle), rücken wir sie ein
         formatted_text = text.replace("\n", f"\n{' ' * 24}")
         print(f"{prefix} {formatted_text}")
 
