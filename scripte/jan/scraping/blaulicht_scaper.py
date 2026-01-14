@@ -17,6 +17,7 @@ init()
 print_lock = None
 
 def init_worker(l):
+    """Initialisiert den Lock für jeden Worker-Prozess"""
     global print_lock
     print_lock = l
 
@@ -38,6 +39,7 @@ def safe_print(text, stadt="System"):
         print(f"{prefix} {formatted_text}")
 
 def load_proxies_from_file():
+    """Lädt die Liste der funktionierenden Proxies aus der Datei"""
     PROXY_FILE_PATH = 'scripte/jan/scraping/working_proxies.txt'
     if not os.path.exists(PROXY_FILE_PATH):
         print(f"Warnung: Proxy-Datei {PROXY_FILE_PATH} nicht gefunden.")
@@ -49,8 +51,10 @@ def load_proxies_from_file():
 
 
 def make_request_with_proxy(url, proxy_list, max_retries=10, context="System"):
+    """führt eine HTTP-Anfrage mit einem zufälligen Proxy aus der Liste durch"""
     if not proxy_list:
         print("Keine Proxies geladen, soll direkte Verbindung verwendet werden?")
+        # Hier habe ich eine backup Lösung eingebaut, falls keine Proxies vorhanden sind
         if input("Y/N").upper() == "Y":
             try:
                 return requests.get(url, timeout=10)
@@ -84,6 +88,7 @@ def make_request_with_proxy(url, proxy_list, max_retries=10, context="System"):
 
 def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
     """
+    Hauptfunktion zum Scrapen der Blaulichtmeldungen für eine bestimmte Stadt.
     städte:         Dresden, Erfurt, Hamburg, München, Nürnberg, Chemnitz, Dortmund\n
     save_as_csv:    True, False (wenn gespeichert werden soll als CSV)\n
     tempo:          10 für schnell, 1 für langsam
@@ -180,6 +185,7 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
 
 
 def load_cities_from_config():
+    """Lädt die Liste der Städte aus der config.ini Datei"""
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     config_path = os.path.join(base_dir, 'config.ini')
     
@@ -198,6 +204,7 @@ def load_cities_from_config():
 
 
 def main():
+    """Hauptfunktion zum Starten des Scraping-Prozesses mit Multiprocessing"""
     target_cities = load_cities_from_config()
     print("="*80)
     print("""

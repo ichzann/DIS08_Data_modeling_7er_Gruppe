@@ -8,6 +8,7 @@ import time
 
 
 def get_proxies():
+    """Sammelt Proxies von der Webseite https://free-proxy-list.net/de/ssl-proxy.html"""
     url: str = "https://free-proxy-list.net/de/ssl-proxy.html"
     daten_dic: list[dict] = []
     headers_list = []
@@ -38,6 +39,7 @@ def get_proxies():
 
 
 def check_proxy(proxy_string):
+    """Überprüft, ob ein Proxy funktioniert, indem eine Anfrage an httpbin.org/ip gesendet wird"""
     try:
         response = requests.get('https://httpbin.org/ip', proxies={'http': proxy_string, 'https': proxy_string}, timeout=3)
         print(f"[+] Funktioniert:\t{proxy_string}")
@@ -48,6 +50,7 @@ def check_proxy(proxy_string):
 
 
 def main_proxies():
+    """Hauptfunktion zum Sammeln und Überprüfen von Proxies"""
     print("\n- Sammle Proxies von: https://httpbin.org/ip\n")
     daten_dic = get_proxies()
 
