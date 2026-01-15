@@ -32,3 +32,6 @@ Das Projekt ist primär in **Python** umgesetzt, wobei ein Großteil der Analyse
     *   `/scripte`: Python-Skripte für Scraping und Processing .
     *   `/statistik`: Analysen und Visualisierungen der Korrelationen.
     *   `/Retrieval (IR)`: Komponenten zur Artikelerfassung und -gewichtung .
+
+## Projekt Dokumentation
+[Roadmap](Roadmap.md)
