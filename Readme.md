@@ -24,5 +24,5 @@ Das Scraping-Skript extrahiert für jeden Artikel:
 
 Den aktuellen Entwicklungsstand und geplante Features findest du auf meinem Trello-Board:
 
-[![Trello Board](https://raw.githubusercontent.com/DEIN_USERNAME/DEIN_REPO/main/assets/trello_board_preview.png)](https://trello.com/b/DEINE_BOARD_ID)
-[![Trello](https://img.shields.io/badge/Trello-Projekt%20Board-blue?style=for-the-badge&logo=trello)](LINK_ZU_DEINEM_TRELLO_BOARD)
+[![Trello Board](assets/trello.png)]
+[![Trello](https://img.shields.io/badge/Trello-Projekt%20Board-blue?style=for-the-badge&logo=trello)](https://trello.com/b/tz49lLdt/mein-trello-board)
