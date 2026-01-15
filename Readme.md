@@ -1,28 +1,34 @@
-# Ø mg daily mean all drugs per country 
-<img src="https://github.com/ichzann/DIS08_Data_modeling_7er_Gruppe/blob/main/Daten_sets/EUDA_Wastewater_analysis_and_drugs/filtered_by_drug/ranking%20videos/ranking_all_drugs.gif?raw=true" width="600" />
+# 🧪 Analyse der Korrelation zwischen Abwasser-Drogenrückständen und Polizeiberichten
 
+Dieses Repository enthält die Forschungsarbeit der **Gruppe 4**, die sich mit der statistischen Beziehung zwischen chemisch nachgewiesenem Drogenkonsum und der öffentlichen Berichterstattung über drogenspezifische Delikte auseinandersetzt.
 
-## 👮 Datenquelle: Polizeimeldungen (Presseportal Blaulicht)
+## 📝 Projektbeschreibung
+Das Ziel dieses Projekts ist es, zu untersuchen, ob eine messbare **Korrelation zwischen den eingenommenen Drogen** (basierend auf Abwasseranalysedaten der EUDA, ehemals EMCDDA) und der **Anzahl der polizeilichen Meldungen** in den jeweiligen Städten besteht. Dabei werden objektive Messwerte aus Wasserwerken den quantitativen Daten aus dem "Blaulichtreport" gegenübergestellt.
 
-Um die quantitativen Abwasserdaten (insb. den Kokain/Crack-Anstieg in Dortmund 2022) zu kontextualisieren, wurden Polizeimeldungen der Dienststelle Dortmund über [Presseportal.de](https://www.presseportal.de/blaulicht/r/Dortmund/0) gescrapt.
+## 🛠 Methodik & Features
 
-### 🎯 Warum diese Datenquelle?
-Während Abwasserdaten reine Verbrauchsmengen anzeigen, liefern die Polizeiberichte den **sozialen und kriminologischen Kontext** auf Straßenebene. Die Verbindung beider Datensätze ermöglicht die Untersuchung folgender Hypothesen:
+Das Projekt umfasst den gesamten Data-Science-Zyklus von der Akquise bis zur Analyse:
 
-1.  **Sichtbarkeit vs. Konsum:** Korreliert die gemessene Stoffmenge im Wasser mit der Anzahl der BTM-Delikte (Betäubungsmittel)?
-2.  **Beschaffungskriminalität:** Da insbesondere der Anstieg von Crack im Ruhrgebiet mit einer Verelendung der Szene einhergeht, lässt sich prüfen, ob parallel zu den Abwasserwerten auch Eigentumsdelikte (Diebstahl, Raub, PKW-Aufbrüche) in den Berichten zunehmen.
-3.  **Hotspot-Identifikation:** Die Texte enthalten oft genaue Ortsangaben (z.B. "Innenstadt", "Nordstadt"), wodurch sich der Konsum räumlich verorten lässt, was Abwasserdaten allein oft nicht leisten können.
+*   **Scraping & Datenerhebung:** 
+    *   Ursprünglich war ein Scraping verschiedener lokaler Nachrichtensender geplant. Um die Skalierbarkeit zu erhöhen und die Wartbarkeit des Codes zu optimieren, wurde der Fokus auf den **zentralen Blaulichtreport** verschoben. 
+    *   Dies ermöglichte die Entwicklung eines spezialisierten Scrapers, der effizient Daten für mehrere Städte aggregiert, ohne für jede Quelle eine individuelle Architektur zu benötigen.
+*   **Data Cleaning & Vorbereitung:**
+    *   Die extrahierten Rohdaten wurden bereinigt und in einem konsolidierten Datensatz zusammengeführt.
+    *   Ziel war die Erstellung einer einheitlichen Datenbasis, die alle für die Fragestellung relevanten Variablen (Stadt, Jahr, Drogentyp, Berichthäufigkeit) enthält.
+*   **Information Retrieval (IR):**
+    *   Implementierung von IR-Techniken, um die relative Dichte relevanter Artikel pro Stadt und Jahr präzise zu erfassen.
+    *   Dieser Prozess dient der Quantifizierung der öffentlichen Wahrnehmung bzw. der polizeilichen Dokumentation von Drogendelikten.
+*   **Statistische Auswertung:**
+    *   Untersuchung der Korrelationen zwischen den Milligramm-Werten pro Tag (daily mean) aus dem Abwasser und der Trefferquote im Information Retrieval.
 
-### 🔍 Extrahierte Datenpunkte
-Das Scraping-Skript extrahiert für jeden Artikel:
-* **Datum & Uhrzeit:** Für zeitliche Reihenanalysen (Time-Series).
-* **Titel & Text:** Für NLP-Analysen (Keyword-Extraction nach Begriffen wie "BTM", "Drogen", "auffälliges Verhalten", "Widerstand").
-* **Dienststelle:** Um sicherzustellen, dass die Berichte dem gleichen Einzugsgebiet wie dem Klärwerk zugeordnet werden können.
+## 💻 Tech Stack
 
+Das Projekt ist primär in **Python** umgesetzt, wobei ein Großteil der Analysen in interaktiven Umgebungen stattfindet:
 
-## kanban 🚧 Projektstatus
-
-Den aktuellen Entwicklungsstand und geplante Features findest du auf meinem Trello-Board:
-
-[![Trello Board](assets/trello.png)]
-[![Trello](https://img.shields.io/badge/Trello-Projekt%20Board-blue?style=for-the-badge&logo=trello)](https://trello.com/b/tz49lLdt/mein-trello-board)
+*   **Sprachen:** Python, Jupyter Notebook.
+*   **Bibliotheken:** (Annahme basierend auf Industriestandards) Pandas für Data Cleaning, BeautifulSoup/Scrapy für Web Scraping, Matplotlib/Seaborn für statistische Auswertungen.
+*   **Repository-Struktur:**
+    *   `/Daten_sets`: Bereinigte und rohe Datenquellen.
+    *   `/scripte`: Python-Skripte für Scraping und Processing .
+    *   `/statistik`: Analysen und Visualisierungen der Korrelationen.
+    *   `/Retrieval (IR)`: Komponenten zur Artikelerfassung und -gewichtung .
