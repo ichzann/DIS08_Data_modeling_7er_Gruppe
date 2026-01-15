@@ -1,5 +1,5 @@
 import pandas as pd
 
-df = pd.read_csv('Data/raw/EUDA_Wasserwerk2016-24/Wasserwerk2016-2024.csv')
+df = pd.read_csv('Data/processed/wasser_cleaning/alle_staedte.csv', sep=';')
 
-print(df["Daily mean"].describe())
+print(df.describe())
