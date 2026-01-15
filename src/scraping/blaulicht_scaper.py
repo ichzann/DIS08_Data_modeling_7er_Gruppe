@@ -9,6 +9,7 @@ import configparser
 import os
 from get_proxies import main_proxies
 from colorama import Fore, Style, init
+from functools import partial
 
 # Init colorama für Windows Kompatibilität
 init()
@@ -40,7 +41,7 @@ def safe_print(text, stadt="System"):
 
 def load_proxies_from_file():
     """Lädt die Liste der funktionierenden Proxies aus der Datei"""
-    PROXY_FILE_PATH = 'scripte/jan/scraping/working_proxies.txt'
+    PROXY_FILE_PATH = 'src/scraping/working_proxies.txt'
     if not os.path.exists(PROXY_FILE_PATH):
         print(f"Warnung: Proxy-Datei {PROXY_FILE_PATH} nicht gefunden.")
         return []
@@ -89,7 +90,9 @@ def make_request_with_proxy(url, proxy_list, max_retries=10, context="System"):
 def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
     """
     Hauptfunktion zum Scrapen der Blaulichtmeldungen für eine bestimmte Stadt.
+    Necessary Parameter:\n
     städte:         Dresden, Erfurt, Hamburg, München, Nürnberg, Chemnitz, Dortmund\n
+    Optional Parameters:\n
     save_as_csv:    True, False (wenn gespeichert werden soll als CSV)\n
     tempo:          10 für schnell, 1 für langsam
     """
@@ -177,35 +180,42 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
     
     if save_as_csv and not df.empty:
         csv_name = f"{stadt}_blaulicht_scrape_{downloadzeit}"
-        df.to_csv(f"Daten_sets/blaulicht_scraping/{csv_name}.csv", index=False, encoding="utf-8")
+        df.to_csv(f"data/processed/blaulicht_scraping/{csv_name}.csv", index=False, encoding="utf-8")
         print(f"DataFrame als CSV gespeichert. Dateiname: {csv_name}")
         safe_print(f"Fertig! {article_counter} Artikel gespeichert.", stadt)
     
     return df
 
 
-def load_cities_from_config():
-    """Lädt die Liste der Städte aus der config.ini Datei"""
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    config_path = os.path.join(base_dir, 'config.ini')
+def load_config_values():
+    """
+    Lädt ALLE Parameter fürs Scraping aus der config.ini Datei\n
+    Hier habe ich auch Fallbacks eingebaut, falls None als Parameter übergeben wird, würde die Scraping Funktion nicht funktionieren
+    """
+
+    config_path = 'config.ini'
     
     config = configparser.ConfigParser()
     config.read(config_path, encoding='utf-8')
     
-    try:
-        cities_string = config['ScrapingEinstellungen']['staedte']
-    except KeyError:
-        print("Fehler: Konnte 'staedte' in config.ini nicht finden.")
-        return []
+    if 'ScrapingEinstellungen' not in config:
+        print("Fehler: Sektion 'ScrapingEinstellungen' fehlt.")
+        return [], True, 10
 
-    cities_list = [city.strip() for city in cities_string.split(',')]
+    section = config['ScrapingEinstellungen']
+
+    cities_string = section.get('staedte', '')
+    cities_list = [city.strip() for city in cities_string.split(',') if city.strip()]
     
-    return cities_list
+    save_csv = section.getboolean('save_as_csv', fallback=True)
+    tempo = section.getint('tempo', fallback=10)
+    
+    return cities_list, save_csv, tempo
 
 
 def main():
     """Hauptfunktion zum Starten des Scraping-Prozesses mit Multiprocessing"""
-    target_cities = load_cities_from_config()
+    target_cities, csv_setting, tempo_setting = load_config_values()
     print("="*80)
     print("""
     ██████╗ ██╗      █████╗ ██╗   ██╗██╗██╗ ██████╗██╗  ██╗████████╗
@@ -227,10 +237,11 @@ def main():
     main_proxies()
     l = Lock()
     anzahl_prozesse = 8
+    scrape_mit_settings = partial(scrape, save_as_csv=csv_setting, tempo=tempo_setting)
     print(f"Starte Multiprocessing mit {anzahl_prozesse} Prozessen für {len(target_cities)} Städte...")
 
     with Pool(processes=anzahl_prozesse, initializer=init_worker, initargs=(l,)) as p:
-        p.map(scrape, target_cities)
+        p.map(scrape_mit_settings, target_cities)
     
 
 

@@ -75,7 +75,7 @@ def main_proxies():
     print(f"\n- Fertig - {len(working_proxies)} funktionierende Proxies gefunden.\n")
 
 
-    pfad = 'scripte/jan/scraping/working_proxies.txt' 
+    pfad = 'src/scraping/working_proxies.txt' 
     with open(pfad, 'w') as f:
         for p in working_proxies:
             f.write(f"{p}\n")
