@@ -34,4 +34,5 @@ Das Projekt ist primär in **Python** umgesetzt, wobei ein Großteil der Analyse
     *   `/Retrieval (IR)`: Komponenten zur Artikelerfassung und -gewichtung .
 
 ## Projekt Dokumentation
-[Roadmap](Roadmap.md)
+[Roadmap](Roadmap.md)  
+[Projekt Report](ProjectReport.md)
