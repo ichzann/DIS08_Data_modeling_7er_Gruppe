@@ -12,7 +12,7 @@ Dieses Repository enthält die Forschungsarbeit der **Gruppe 4** zur statistisch
 
 ---
 
-## 🎯 Projektziel
+## Projektziel
 
 Wir stellen objektive Messwerte aus Kläranlagen den quantitativen Daten aus dem **Blaulichtreport** (Presseportal) gegenüber.
 
@@ -23,7 +23,7 @@ Wir stellen objektive Messwerte aus Kläranlagen den quantitativen Daten aus dem
 
 ---
 
-## 📝 Projektbeschreibung
+## Projektbeschreibung
 
 Ziel dieses Projekts ist es zu untersuchen, ob eine messbare **Korrelation zwischen konsumierten Drogen** (basierend auf Abwasseranalysedaten der **EUDA**, ehemals EMCDDA) und der **Anzahl polizeilicher Meldungen** in den jeweiligen Städten besteht.
 
@@ -31,7 +31,7 @@ Hierbei werden objektive Messwerte aus Wasserwerken systematisch den quantitativ
 
 ---
 
-## 🗂 Projektstruktur
+## Projektstruktur
 
 ```text
 DIS08_Data_modeling/
@@ -53,7 +53,7 @@ DIS08_Data_modeling/
 
 ---
 
-## 🛠 Methodik & Features
+## Methodik & Features
 
 Das Projekt deckt den gesamten **Data-Science-Zyklus** ab – von der Datenerhebung bis zur statistischen Auswertung:
 
@@ -96,7 +96,7 @@ Das Projekt deckt den gesamten **Data-Science-Zyklus** ab – von der Datenerheb
 
 ---
 
-## 🛠 Installation & Setup
+## Installation & Setup
 
 ### 1️⃣ Repository klonen
 
