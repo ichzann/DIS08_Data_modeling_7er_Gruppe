@@ -22,4 +22,5 @@
 ## 🤖 KI-Nutzung
 * **Coding:** VSCode KI-Agent.
 * **Debugging:** Analyse und Erklärung komplexer Python-Fehlermeldungen.
+* **Visualisierung:** schnelle Erstellung von Grafiken, um diese dann später zu modifizieren.
 * **Git-Support:** Erkennung und Lösungshilfe bei Git-Konflikten und Fehlern.
