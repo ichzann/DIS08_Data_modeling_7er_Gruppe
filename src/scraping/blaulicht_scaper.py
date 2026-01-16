@@ -193,7 +193,7 @@ def load_config_values():
     Hier habe ich auch Fallbacks eingebaut, falls None als Parameter übergeben wird, würde die Scraping Funktion nicht funktionieren
     """
 
-    config_path = 'config.ini'
+    config_path = './src/scraping/config.ini'
     
     config = configparser.ConfigParser()
     config.read(config_path, encoding='utf-8')
