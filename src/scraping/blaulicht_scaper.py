@@ -180,7 +180,7 @@ def scrape(stadt: str, save_as_csv: bool = True, tempo: int = 10):
     
     if save_as_csv and not df.empty:
         csv_name = f"{stadt}_blaulicht_scrape_{downloadzeit}"
-        df.to_csv(f"data/processed/blaulicht_scraping/{csv_name}.csv", index=False, encoding="utf-8")
+        df.to_csv(f"data/raw/blaulicht_scraping/{csv_name}.csv", index=False, encoding="utf-8")
         print(f"DataFrame als CSV gespeichert. Dateiname: {csv_name}")
         safe_print(f"Fertig! {article_counter} Artikel gespeichert.", stadt)
     
