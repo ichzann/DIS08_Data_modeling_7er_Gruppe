@@ -36,3 +36,4 @@ Das Projekt ist primär in **Python** umgesetzt, wobei ein Großteil der Analyse
 ## Projekt Dokumentation
 [Roadmap](Roadmap.md)  
 [Projekt Report](ProjectReport.md)
+[Lessons Learned](Lessons_learned.md)
