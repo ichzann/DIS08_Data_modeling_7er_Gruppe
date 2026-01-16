@@ -6,6 +6,7 @@
 > **Dokumentation:** [Projekt-Report lesen](./ProjectReport.md)  
 > **Planung:** [Roadmap ansehen](./Roadmap.md)
 [Unser Trello Board](assets/trello.png)
+> **Lessons Learned:** [Lessons Learned ansehen](Lessons_learned.md)
 
 Dieses Repository enthält die Forschungsarbeit der **Gruppe 4** zur statistischen Beziehung zwischen chemisch nachgewiesenem Drogenkonsum und der öffentlichen Berichterstattung über drogenspezifische Delikte.
 
